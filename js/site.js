@@ -18,6 +18,7 @@
     setupReveals();
   }
   setupHeader();
+  setupNav();
   setupModal();
   setupForm();
   unlockVideosOnTouch();
@@ -129,6 +130,33 @@
     window.addEventListener('touchstart', unlock, { once: true, passive: true });
   }
 
+  /* ---------- Collapsible navigation for tablet and phone ---------- */
+  function setupNav() {
+    const head = document.getElementById('siteHead');
+    const toggle = head.querySelector('.nav-toggle');
+    const nav = document.getElementById('siteNav');
+    if (!toggle || !nav) return;
+    const narrow = window.matchMedia('(max-width: 860px)');
+
+    const setOpen = (open, moveFocus) => {
+      head.classList.toggle('is-open', open);
+      document.body.classList.toggle('nav-open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      if (moveFocus) {
+        const target = open ? nav.querySelector('a') : toggle;
+        if (target) setTimeout(() => target.focus(), open ? 120 : 0);
+      }
+    };
+    const isOpen = () => head.classList.contains('is-open');
+
+    toggle.addEventListener('click', () => setOpen(!isOpen(), true));
+    nav.addEventListener('click', (e) => { if (e.target.closest('a')) setOpen(false, false); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen()) setOpen(false, true); });
+    narrow.addEventListener('change', (e) => { if (!e.matches && isOpen()) setOpen(false, false); });
+    document.addEventListener('nav:close', () => { if (isOpen()) setOpen(false, false); });
+  }
+
   /* ---------- Registry modal ---------- */
   function setupModal() {
     const dialog = document.getElementById('registryModal');
@@ -148,7 +176,7 @@
     };
 
     document.querySelectorAll('[data-open-registry]').forEach((el) => {
-      el.addEventListener('click', (e) => { e.preventDefault(); open(el); });
+      el.addEventListener('click', (e) => { e.preventDefault(); document.dispatchEvent(new CustomEvent('nav:close')); open(el); });
     });
     dialog.querySelectorAll('[data-close-registry]').forEach((el) => el.addEventListener('click', close));
 

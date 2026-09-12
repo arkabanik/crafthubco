@@ -222,3 +222,6 @@ __marimo__/
 
 # macOS
 .DS_Store
+
+# Unused 4K master of the pour; too large for the repo
+assets/videos/3.mp4
