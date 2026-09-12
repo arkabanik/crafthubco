@@ -1,0 +1,40 @@
+# The Craft Hub — static site config for Apache / LiteSpeed (Hostinger)
+
+# Correct MIME types so browsers stream and seek the films
+AddType video/webm .webm
+AddType video/mp4 .mp4
+AddType text/javascript .js
+AddType image/svg+xml .svg
+
+# Long cache for media and versioned assets, short cache for the page
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType video/webm "access plus 1 year"
+  ExpiresByType video/mp4 "access plus 1 year"
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType text/javascript "access plus 1 month"
+  ExpiresByType text/html "access plus 10 minutes"
+</IfModule>
+
+# Compress text; never compress video
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript image/svg+xml
+</IfModule>
+
+# Security headers
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+</IfModule>
+
+# Serve the single page for the root and hide directory listings
+DirectoryIndex index.html
+Options -Indexes
+
+# Force HTTPS once the certificate is active on Hostinger
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} !=on
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+</IfModule>
